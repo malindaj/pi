@@ -1,0 +1,164 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+      Pi.init({ version: "2.0", sandbox: true });
+    </script>
+  </head>
+
+  <body>
+    <!-- <h1>Test</h1> -->
+  </body>
+  <script>
+    window.addEventListener("DOMContentLoaded", async function () {
+      // Extract the referer URL from the query parameters
+      let searchParams = new URLSearchParams(window.location.search);
+      let action = searchParams.get("action");
+      if (action === "AUTH") {
+        // Authenticate the user, and get permission to request payments from them:
+        const scopes = ["username", "payments"];
+
+        // Read more about this callback in the SDK reference:
+        function onIncompletePaymentFound(payment) {
+          /* ... */
+        }
+
+        Pi.authenticate(scopes, onIncompletePaymentFound)
+          .then(function (auth) {
+            console.log(auth);
+            console.log(`Hi there! You're ready to make payments!`);
+
+            // Extract the referer URL from the query parameters
+            let searchParams = new URLSearchParams(window.location.search);
+            let referer = searchParams.get("currentSite");
+
+            if (referer) {
+              // Convert the auth object into a JSON string
+              let authJson = JSON.stringify(auth);
+
+              // URL-encode the JSON string
+              let authEncoded = encodeURIComponent(authJson);
+
+              // Redirect to the referer page with auth as a query parameter
+              setTimeout(() => {
+                window.top.location.href =
+                  referer + "?auth=" + authEncoded + "&status=success";
+              }, 2000);
+            }
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
+      } else if (action === "PAYMENT") {
+        const scopes = ["username", "payments"];
+
+        let isReadyForServerApproval = false;
+        let isReadyForServerCompletion = false;
+        let isCancelled = false;
+        let isErrored = false;
+        let responsePaymentId = "";
+        let responseTxid = "";
+        let responseError = "";
+        let responsePayment = "";
+
+        // Read more about this callback in the SDK reference:
+        function onIncompletePaymentFound(payment) {
+          /* ... */
+        }
+
+        const onReadyForServerApproval = (paymentId) => {
+          console.log("onReadyForServerApproval", paymentId);
+          isReadyForServerApproval = true;
+          responsePaymentId = paymentId;
+        };
+
+        const onReadyForServerCompletion = (paymentId, txid) => {
+          console.log("onReadyForServerCompletion", paymentId, txid);
+          isReadyForServerCompletion = true;
+          responsePaymentId = paymentId;
+          responseTxid = txid;
+        };
+
+        const onCancel = (paymentId) => {
+          console.log("onCancel", paymentId);
+          isCancelled = true;
+          responsePaymentId = paymentId;
+        };
+
+        const onError = (error, payment = null) => {
+          console.log("onError", error);
+          if (payment) {
+            console.log(payment);
+            // handle the error accordingly
+            responsePayment = payment;
+          }
+          isErrored = true;
+          responseError = error;
+        };
+
+        await Pi.authenticate(scopes, onIncompletePaymentFound)
+          .then(function (auth) {
+            console.log(auth);
+            console.log(`Hi there! You're ready to make payments!`);
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
+
+        let searchParams = new URLSearchParams(window.location.search);
+        let paymentDetails = searchParams.get("paymentData");
+        //decode uri payment details
+        paymentDetails = JSON.parse(decodeURIComponent(paymentDetails));
+        const { memo, amount, paymentMetadata } = paymentDetails;
+        console.log(paymentDetails);
+
+        const paymentData = { amount, memo, metadata: { productId: 'apple_pie_1' }};
+        const callbacks = {
+          onReadyForServerApproval,
+          onReadyForServerCompletion,
+          onCancel,
+          onError,
+        };
+        const pay = await window.Pi.createPayment(paymentData, callbacks);
+        //   .then((payment) => {
+        //     console.log(payment);
+        //     // Extract the referer URL from the query parameters
+        //     let searchParams = new URLSearchParams(window.location.search);
+        //     let referer = searchParams.get("currentSite");
+
+        //     const payload = {
+        //       isReadyForServerApproval,
+        //       isReadyForServerCompletion,
+        //       isCancelled,
+        //       isErrored,
+        //       responsePaymentId,
+        //       responseTxid,
+        //       responseError,
+        //       responsePayment,
+        //     };
+
+        //     if (referer) {
+        //       // Convert the auth object into a JSON string
+        //       let payloadString = JSON.stringify(payload);
+
+        //       // URL-encode the JSON string
+        //       let payloadEncoded = encodeURIComponent(payloadString);
+
+        //       // Redirect to the referer page with auth as a query parameter
+        //       // setTimeout(() => {
+        //       //     window.top.location.href =
+        //       //         referer + "?payload=" + payloadEncoded + "&status=success";
+        //       // }, 2000);
+        //     }
+        //   })
+        //   .catch((error) => {
+        //     console.log(error);
+        //   });
+        console.log(pay);
+      }
+    });
+  </script>
+</html>
