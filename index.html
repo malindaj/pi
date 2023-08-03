@@ -7,13 +7,21 @@
     <script>
       Pi.init({ version: "2.0", sandbox: true });
     </script>
+    <style>
+      /* Initially hide the return button */
+      #return-btn {
+        display: none;
+      }
+    </style>
   </head>
 
   <body>
     <!-- <h1>Test</h1> -->
+    <button id="return-btn">Return To App</button>
   </body>
   <script>
     window.addEventListener("DOMContentLoaded", async function () {
+      let returnBtn = document.getElementById('return-btn');
       // Extract the referer URL from the query parameters
       let searchParams = new URLSearchParams(window.location.search);
       let action = searchParams.get("action");
@@ -42,11 +50,12 @@
               // URL-encode the JSON string
               let authEncoded = encodeURIComponent(authJson);
 
-              // Redirect to the referer page with auth as a query parameter
-              setTimeout(() => {
-                window.top.location.href =
-                  referer + "?auth=" + authEncoded + "&status=success";
-              }, 2000);
+              // Show the return button and add a click event to it
+              returnBtn.style.display = 'block';
+              returnBtn.onclick = function() {
+                // Redirect to the referer page with auth as a query parameter
+                window.top.location.href = referer + "?auth=" + authEncoded + "&status=success";
+              }
             }
           })
           .catch(function (error) {
