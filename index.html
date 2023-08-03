@@ -12,10 +12,27 @@
       #return-btn, #success-text {
         display: none;
       }
+
+      /* Simple CSS loader */
+      .loader {
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
     </style>
   </head>
 
   <body>
+    <!-- Loader -->
+    <div id="loader" class="loader"></div>
     <h1 id="success-text">successfully login!, please return to app now</h1>
     <button id="return-btn">Return To App</button>
   </body>
@@ -23,6 +40,7 @@
     window.addEventListener("DOMContentLoaded", async function () {
       let returnBtn = document.getElementById('return-btn');
       let successText = document.getElementById('success-text');
+      let loader = document.getElementById('loader'); // Get loader
       // Extract the referer URL from the query parameters
       let searchParams = new URLSearchParams(window.location.search);
       let action = searchParams.get("action");
@@ -52,6 +70,7 @@
               let authEncoded = encodeURIComponent(authJson);
 
               // Show the return button and add a click event to it
+              loader.style.display = 'none';
               returnBtn.style.display = 'block';
               successText.style.display = 'block';
               returnBtn.onclick = function() {
