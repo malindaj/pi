@@ -9,19 +9,20 @@
     </script>
     <style>
       /* Initially hide the return button */
-      #return-btn {
+      #return-btn, #success-text {
         display: none;
       }
     </style>
   </head>
 
   <body>
-    <!-- <h1>Test</h1> -->
+    <h1 id="success-text">successfully login!, please return to app now</h1>
     <button id="return-btn">Return To App</button>
   </body>
   <script>
     window.addEventListener("DOMContentLoaded", async function () {
       let returnBtn = document.getElementById('return-btn');
+      let successText = document.getElementById('success-text');
       // Extract the referer URL from the query parameters
       let searchParams = new URLSearchParams(window.location.search);
       let action = searchParams.get("action");
@@ -52,6 +53,7 @@
 
               // Show the return button and add a click event to it
               returnBtn.style.display = 'block';
+              successText.style.display = 'block';
               returnBtn.onclick = function() {
                 // Redirect to the referer page with auth as a query parameter
                 window.top.location.href = referer + "?auth=" + authEncoded + "&status=success";
